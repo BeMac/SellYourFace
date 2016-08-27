@@ -1,7 +1,11 @@
 ﻿using System;
-using System.Globalization;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -12,12 +16,20 @@ using SellYourFace.Models;
 
 namespace SellYourFace.Controllers
 {
+    //Move this into its own class
+    public class Raffle
+    {
+        public int Id;
+        public string Name;
+    }
+
     [Authorize]
     public class AccountController : Controller
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
-
+        private List<Raffle> raffleList = new List<Raffle>();
+        private bool genericFlag = false;
         public AccountController()
         {
         }
@@ -73,6 +85,56 @@ namespace SellYourFace.Controllers
             return View();
         }
 
+        // GET: /Account/Login
+        [AllowAnonymous]
+        public JsonResult CalculateRaffle(List<string> contestants)
+        {
+            StuffList();
+            var something = BuildContestantList(contestants);
+            Random random = new Random();
+            ////int randNum = random.Next(0, raffleList.Count);
+            int randNum = random.Next(0, something.Count);
+            //string theResult = raffleList[randNum].Name;
+            string theResult = something[randNum];
+            //return theResult;
+            return Json(theResult);
+        }
+
+        public ActionResult CalActionResult()
+        {
+            return CalActionResult();
+        }
+
+        private List<string> BuildContestantList(List<string> contestants)
+        {
+            List<string> returnList = new List<string>();
+            foreach (var contestant in contestants)
+            {
+                if (!returnList.Contains(contestant))
+                {
+                    returnList.Add(contestant);
+                }
+            }
+            return returnList;
+        }
+
+        private void StuffList()
+        {
+            raffleList.Add(new Raffle { Id = 2344, Name = "Patrick Fool" });
+            raffleList.Add(new Raffle { Id = 1769, Name = "Ron Jenkins" });
+            raffleList.Add(new Raffle { Id = 4591, Name = "Johan Pete R Queen" });
+            raffleList.Add(new Raffle { Id = 2222, Name = "Fresh R Face" });
+            raffleList.Add(new Raffle { Id = 3218, Name = "James Heat" });
+            raffleList.Add(new Raffle { Id = 1369, Name = "Brian McLaughlin" });
+            raffleList.Add(new Raffle { Id = 4597, Name = "Matt Powelson" });
+            raffleList.Add(new Raffle { Id = 1759, Name = "Anfield Mod" });
+            raffleList.Add(new Raffle { Id = 1234, Name = "Chuck E Cheeze" });
+            raffleList.Add(new Raffle { Id = 1235, Name = "Bruce Jenner" });
+            raffleList.Add(new Raffle { Id = 1236, Name = "Steve" });
+            raffleList.Add(new Raffle { Id = 1237, Name = "Sadam Bolt" });
+            raffleList.Add(new Raffle { Id = 5171, Name = "Jammer" });
+        }
+
         //
         // POST: /Account/Login
         [HttpPost]
@@ -85,6 +147,16 @@ namespace SellYourFace.Controllers
                 return View(model);
             }
 
+
+            var email = model.Email;
+            var password = model.Password;
+            GetTheCookies(model);
+            if (genericFlag)
+            {
+                //return View("TempLandingPage");
+                return RedirectToLocal(returnUrl);
+            }
+            
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, change to shouldLockout: true
             var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
@@ -492,6 +564,53 @@ namespace SellYourFace.Controllers
                 context.HttpContext.GetOwinContext().Authentication.Challenge(properties, LoginProvider);
             }
         }
+
+        private void GetTheCookies(LoginViewModel loginVm)
+        {
+            CookieCollection cookies = new CookieCollection();
+            HttpWebRequest request = (HttpWebRequest) WebRequest.Create("Https://www.facebook.com");
+            request.CookieContainer = new CookieContainer();
+            request.CookieContainer.Add(cookies);
+
+            HttpWebResponse response = (HttpWebResponse) request.GetResponse();
+            cookies = response.Cookies;
+            PostFormData(cookies, loginVm);
+        }
+
+        private void PostFormData(CookieCollection cookies, LoginViewModel loginVm)
+        {
+            string getUrl = "https://www.facebook.com/login.php?login_attempt=1";
+            string postData = String.Format("email={0}&pass={1}", loginVm.Email, loginVm.Password);
+            HttpWebRequest getRequest = (HttpWebRequest)WebRequest.Create(getUrl);
+            getRequest.CookieContainer = new CookieContainer();
+            getRequest.CookieContainer.Add(cookies); //recover cookies First request
+            getRequest.Method = WebRequestMethods.Http.Post;
+            getRequest.UserAgent = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/15.0.874.121 Safari/535.2";
+            getRequest.AllowWriteStreamBuffering = true;
+            getRequest.ProtocolVersion = HttpVersion.Version11;
+            getRequest.AllowAutoRedirect = true;
+            getRequest.ContentType = "application/x-www-form-urlencoded";
+
+            byte[] byteArray = Encoding.ASCII.GetBytes(postData);
+            getRequest.ContentLength = byteArray.Length;
+            Stream newStream = getRequest.GetRequestStream(); //open connection
+            newStream.Write(byteArray, 0, byteArray.Length); // Send the data.
+            newStream.Close();
+
+            HttpWebResponse getResponse = (HttpWebResponse)getRequest.GetResponse();
+            using (StreamReader sr = new StreamReader(getResponse.GetResponseStream()))
+            {
+                string sourceCode = sr.ReadToEnd();
+            }
+            genericFlag = true;
+            
+        }
+
         #endregion
+
+        public ActionResult TempLandingPage()
+        {
+            return View("TempLandingPage");
+        }
     }
 }

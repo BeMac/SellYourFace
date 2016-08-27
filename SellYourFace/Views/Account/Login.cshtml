@@ -1,31 +1,85 @@
-﻿@using SellYourFace.Models
+﻿@using SellYourFace.Controllers
+@using SellYourFace.Models
 @model LoginViewModel
 @{
-    ViewBag.Title = "Log in";
+    ViewBag.Title = "Welcome";
 }
-
+<head>
+    <title>Facebook Login JavaScript Example</title>
+    <meta charset="UTF-8">
+</head>
 <h2>@ViewBag.Title.</h2>
 <div class="row">
     <div class="col-md-8">
         <section id="loginForm">
-            @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+            @using (Html.BeginForm("Login", "Account", new {ReturnUrl = ViewBag.ReturnUrl}, FormMethod.Post, new {@class = "form-horizontal", role = "form"}))
             {
+
                 @Html.AntiForgeryToken()
-                <h4>Use a local account to log in.</h4>
-                <hr />
-                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <h4>Please Log in to get started.</h4>
+                <hr/>
+                @Html.ValidationSummary(true, "", new {@class = "text-danger"})
+                
+                <div id="fbLogin" align="center" style="padding: 20px;">
+                    <fb:login-button data-size="xlarge" scope="public_profile,email" onlogin="checkLoginState();">
+                    </fb:login-button>
+                </div>
+                <div>
+                    <input type="text" id="numberOfWinners"/>
+                    <button id="fbWildCard" type="button">Run Raffle</button>
+                </div>
+                <br/><br/>
+                <div id="photo"></div>
+                <br /><br />
+                <div>
+                    <button id="fbLogin2">Login with Facebook</button>
+                </div>
+                <br /><br />
+                <div>
+                    <button id="fbLogout">Log ouf of Facebook</button>
+                </div>
+                <br/><br/>
+
+                //PHOTO UPLOAD ARES
+                <div>
+                    <label for="photoMsg">Photo Message</label>
+                    <input id="photoMsg" type="text" />
+                </div>
+                <br/><br/>
+                <div>
+                    <label for="photoUrl">Photo URL</label>
+                    <input id="photoUrl" type="text" />
+                </div>
+                <br /><br />
+                <div>
+                    <button id="personalPhotoBtn" type="button">Post Photo To Your Wall</button>
+                </div>
+                //WAL POST AREA
+                <div>
+                    <label for="personalWallMsg">Message to Post To Your Wall</label>
+                    <input id="personalWallMsg" type="text" />
+                </div>
+                <br /><br />
+                <div>
+                    <button id="personalWallBtn" type="button">Post Message To Your Wall</button>
+                </div>
+                <br /><br />
+                <div>
+                    <button id="fbDeleteLastPost" type="button">Delete Last Post</button>
+                </div>
+                <br /><br />
                 <div class="form-group">
-                    @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })
+                    @Html.LabelFor(m => m.Email, new {@class = "col-md-2 control-label"})
                     <div class="col-md-10">
-                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
-                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                        @Html.TextBoxFor(m => m.Email, new {@class = "form-control"})
+                        @Html.ValidationMessageFor(m => m.Email, "", new {@class = "text-danger"})
                     </div>
                 </div>
                 <div class="form-group">
-                    @Html.LabelFor(m => m.Password, new { @class = "col-md-2 control-label" })
+                    @Html.LabelFor(m => m.Password, new {@class = "col-md-2 control-label"})
                     <div class="col-md-10">
-                        @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
-                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                        @Html.PasswordFor(m => m.Password, new {@class = "form-control"})
+                        @Html.ValidationMessageFor(m => m.Password, "", new {@class = "text-danger"})
                     </div>
                 </div>
                 <div class="form-group">
@@ -36,14 +90,48 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
-                        <input type="submit" value="Log in" class="btn btn-default" />
+                        <input type="submit" value="Log in" class="btn btn-default"/>
                     </div>
+                    <br/><br/><br/><br/>
+
+
+
+
+                    <div>
+                        <label for="groupWallMsg">Message to Post To Group Wall</label>
+                        <input id="groupWallMsg" type="text" />
+                    </div>
+                    <br /><br />
+                    <div>
+                        <button id="groupWallBtn" type="button">Post Message To Group Wall</button>
+                    </div>
+                    <br/><br/>
+                    <div>
+                        <button id="RaffleBtn" type="button">Gimme a Winner!!</button>
+                    </div>
+                    <br /><br />
+
+                    
                 </div>
                 <p>
                     @Html.ActionLink("Register as a new user", "Register")
                 </p>
+                <br/><br/><br/><br/>
+                <div class="fb-like" data-share="true" data-width="450" data-show-faces="true">
+                </div>
+
+                <!--
+                Below we include the Login Button social plugin. This button uses
+                the JavaScript SDK to present a graphical Login button that triggers
+                the FB.login() function when clicked.
+                -->
+                
+
+                <div id="status">
+                </div>
                 @* Enable this once you have account confirmation enabled for password reset functionality
                     <p>
                         @Html.ActionLink("Forgot your password?", "ForgotPassword")
@@ -53,11 +141,289 @@
     </div>
     <div class="col-md-4">
         <section id="socialLoginForm">
-            @Html.Partial("_ExternalLoginsListPartial", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })
+            @Html.Partial("_ExternalLoginsListPartial", new ExternalLoginListViewModel {ReturnUrl = ViewBag.ReturnUrl})
         </section>
     </div>
 </div>
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryval");
+    <script>
+        var lastPostId = [];
+        $(document).ready(function () {
+            window.fbAsyncInit = function () {
+                FB.init({
+                    appId: '301621843512901',
+                    //cookie: true,
+                    xfbml: true,
+                    version: 'v2.7'
+                });
+
+                FB.getLoginStatus(function (response) {
+                    if (response.status === 'connected') {
+                        console.log('Logged in.');
+                    }
+                    else {
+                        FB.login();
+                    }
+                });
+            };
+
+            (function (d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) { return; }
+                js = d.createElement(s); js.id = id;
+                js.src = "//connect.facebook.net/en_US/sdk.js";
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+        });
+        
+        //POST MESSAGE TO PERSONAL WALL
+        var postMessage = function (message) {
+            FB.api('/me/feed', 'post', { message: message }, function (response) {
+                if (!response || response.error) {
+                    //logg or post??
+                } else {
+                    //log or post??
+                    //set lastPostId for deleting.
+                    lastPostId.push(response.id);
+                }
+            });
+        }
+        
+        //DELETE LAST MESSAGE FROM personal WALL
+        var deleteMessage = function() {
+            FB.api(lastPostId.pop(), 'delete');
+        }
+
+        var uploadPictureSimple = function() {
+            var imgURL = "https://img.ifcdn.com/images/c25336366160316a20765a60d16548908299edaa10d6922959bbb99f590afdf6_1.jpg";
+            var imgUrl = $('#photoUrl').val();
+            var message = $('#photoMsg').val();
+            FB.api('/me/photos', 'post', {
+                message: message,
+                url: imgUrl
+            }, function (response) {
+
+                if (!response || response.error) {
+                    alert('Error occured');
+                } else {
+                    alert('Post ID: ' + response.id);
+                }
+
+            });
+        }
+
+        $("#fbWildCard").click(function () {
+            GetAlbumIdByName("Profile Pictures", function (targetedAlbumId) {
+                var albumId = targetedAlbumId;
+                GetTopPhotoIdByAlbumId(albumId, function (topPhotoId) {
+                    var photoId = topPhotoId;
+                    var names = [];
+                    GetCommentNames(photoId, function (commenterNames) {
+                        debugger;
+                        for (var index = 0; index < commenterNames.length; index++) {
+                            names.push(commenterNames[index]);
+                        }
+                        GetLikeNames(photoId, function (likeNames) {
+                            debugger;
+                            for (var index = 0; index < likeNames.length; index++) {
+                                names.push(likeNames[index]);
+                            }
+                            CallRaffleSelecter(names);
+                            //GetShareNames(photoId, function(shareNames) {
+                            //    debugger;
+                            //    for (var index = 0; index < shareNames.length; index++) {
+                            //        names.push(shareNames[0]);
+                            //    }
+                            //    alert(names[0] + " commented on your picture.");
+                            //});
+                        });
+                    });
+                   
+                });
+            });
+        });
+
+        function CallRaffleSelecter(names) {
+            var postData = { contestants: names };
+            $.ajax({
+                type: "POST",
+                data: postData,
+                url: '@Url.Action("CalculateRaffle", "Account")',
+                success: function (result) {
+                    alert("And the winner is....." + result);
+                },
+                error: function (error) {
+                    alert(error);
+                }
+            });
+        }
+
+        $("#fbDeleteLastPost").click(function () {
+            deleteMessage();
+        });
+
+        $("#personalWallBtn").click(function() {
+            var message = $("#personalWallMsg").val();
+            postMessage(message);
+        });
+
+        function GetAlbumIdByName(targetAlbumName, callback) {
+            targetAlbumName = "Profile Pictures"; //hardcoded for now.
+            var returnId = "";
+            FB.api('/me/albums', 'get', { scope: 'user_photos' },
+                function (response) {
+                    for (var index = 0; index < response.data.length; index++) {
+                        var thisName = response.data[index].name;
+                        if (thisName === targetAlbumName) {
+                            returnId = response.data[index].id;
+                            return callback(returnId);
+                            //break;
+                        }
+                    }
+            });
+        }
+
+        function GetTopPhotoIdByAlbumId(albumId, callback) {
+            FB.api('/' + albumId + '/photos', 'get', { scope: 'user_photos' },
+               function (response) {
+                   //debugger;
+                   var thePhotoId = response.data[0].id;
+                   return callback(thePhotoId);
+               });
+        }
+
+        function GetCommentNames(photoId, callback) {
+            //debugger;
+            FB.api('/' + photoId + '/comments', 'get', { scope: 'user_photos' },
+               function (response) {
+                   var commenters = [];
+                   for (var index = 0; index < response.data.length; index++) {
+                       var commenter = response.data[index].from.name;
+                       commenters.push(commenter);
+                   }
+                return callback(commenters);
+         });
+        }
+
+        function GetLikeNames(photoId, callback) {
+            FB.api('/' + photoId + '/likes', 'get', { scope: 'user_photos' },
+               function (response) {
+                   var likers = [];
+                   for (var index = 0; index < response.data.length; index++) {
+                       var liker = response.data[index].name;
+                       likers.push(liker);
+                   }
+                   return callback(likers);
+               });
+        }
+
+        function GetShareNames(photoId, callback) {
+            debugger;
+            FB.api('/' + photoId + '?fields=sharedposts', 'get', { scope: 'user_photos' },
+               function (response) {
+                   debugger;
+                   var sharers = [];
+                   for (var index = 0; index < response.data.length; index++) {
+                       var sharer = response.data[index].id;
+                       sharers.push(sharer);
+                   }
+                   return callback(sharers);
+               });
+        }
+
+        //Post Message to Group Wall
+        $("#groupWallBtn")
+            .click(function() {
+                debugger;
+
+                var message = $("#groupWallMsg").val();
+                var id = "321381094859929";
+                debugger;
+                FB.login(function() {
+                    debugger;
+                    FB.api('/' + id + '/feed', 'post', { message: message });
+                },
+                { scope: 'publish_actions, user_managed_groups' });
+            });
+
+        $("#fbLogin2").click(function () {
+            FB.login(function (response) {
+                if (response.authResponse) {
+                    console.log('Welcome!  Fetching your information.... ');
+                    FB.api('/me', function (response) {
+                        console.log('Good to see you, ' + response.name + '.');
+                    });
+                } else {
+                    console.log('User cancelled login or did not fully authorize.');
+                }
+            },
+            { scope: 'publish_actions, user_managed_groups,user_photos' }
+            );
+        });
+        
+        $("#fbLogout").click(function () {
+            FB.logout(function(response) {
+                //user is now logged out
+            });
+        });
+        var theMessage = "";
+
+        //Call into RaffleGenerator
+        $("#RaffleBtn")
+            .click(function() {
+                debugger;
+                $.ajax({
+                    url: '@Url.Action("CalculateRaffle", "Account")',
+                    success: function (result) {
+                        alert("And the winner is....." + result);
+                    },
+                    error: function (error) {
+                        debugger;
+                        alert(error);
+                    }
+                });
+            });
+
+        // This is called with the results from from FB.getLoginStatus().
+        function statusChangeCallback(response) {
+            console.log('statusChangeCallback');
+            console.log(response);
+            // The response object is returned with a status field that lets the
+            // app know the current login status of the person.
+            // Full docs on the response object can be found in the documentation
+            // for FB.getLoginStatus().
+            if (response.status === 'connected') {
+                // Logged into your app and Facebook.
+                testAPI();
+            } else if (response.status === 'not_authorized') {
+                // The person is logged into Facebook, but not your app.
+                document.getElementById('status').innerHTML = 'Please log ' +
+                    'into this app.';
+            } else {
+                // The person is not logged into Facebook, so we're not sure if
+                // they are logged into this app or not.
+                document.getElementById('status').innerHTML = 'Please log ' +
+                    'into Facebook.';
+            }
+        }
+
+        function checkLoginState() {
+            FB.getLoginStatus(function (response) {
+                statusChangeCallback(response);
+            });
+        }
+
+        // Here we run a very simple test of the Graph API after login is
+        // successful.  See statusChangeCallback() for when this call is made.
+        function testAPI() {
+            console.log('Welcome!  Fetching your information.... ');
+            FB.api('/me', function (response) {
+                console.log('Successful login for: ' + response.name);
+                document.getElementById('status').innerHTML =
+                    'Thanks for logging in, ' + response.name + '!';
+            });
+        }
+    </script>
 }

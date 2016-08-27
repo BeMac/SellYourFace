@@ -1,0 +1,16 @@
+﻿@model SellYourFace.Models.TempLandingPageViewModel
+@{
+    ViewBag.Title = "Happy Happy Happy";
+}
+<h2>@ViewBag.Title.</h2>
+@using (Html.BeginForm("TempLandingPage", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    <div>
+        Are you not entertained???
+    </div>
+}
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

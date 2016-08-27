@@ -117,4 +117,11 @@ namespace SellYourFace.Models
         [Display(Name = "Email")]
         public string Email { get; set; }
     }
+
+    public class TempLandingPageViewModel
+    {
+        [Display(Name = "Blah")]
+        public string Blah = "Do Some Shit";
+    }
+
 }

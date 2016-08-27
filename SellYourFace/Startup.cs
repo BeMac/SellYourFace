@@ -14,5 +14,9 @@ namespace SellYourFace
         {
             ConfigureAuth(app);
         }
+
+        private const string Something = "";
+
+
     }
 }
