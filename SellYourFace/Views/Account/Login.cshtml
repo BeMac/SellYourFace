@@ -19,14 +19,28 @@
                 <h4>Please Log in to get started.</h4>
                 <hr/>
                 @Html.ValidationSummary(true, "", new {@class = "text-danger"})
-                
+
                 <div id="fbLogin" align="center" style="padding: 20px;">
                     <fb:login-button data-size="xlarge" scope="public_profile,email" onlogin="checkLoginState();">
                     </fb:login-button>
                 </div>
                 <div>
+                    <button id="fbWildCard" type="button">Wild Card Button</button>
+                </div>
+                <br/><br/>
+                <div>
+                    <button id="getAlbumBtn" type="button">Get Photo Album List</button>
+                </div>
+                <br /><br />
+                <div>
+                    <select id="albumDropDown">
+                        <option>Please Select A Photo Album</option>
+                    </select>
+                </div>
+                <br /><br />
+                <div>
                     <input type="text" id="numberOfWinners"/>
-                    <button id="fbWildCard" type="button">Run Raffle</button>
+                    <button id="runRaffle" type="button">Run Raffle</button>
                 </div>
                 <br/><br/>
                 <div id="photo"></div>
@@ -214,8 +228,58 @@
             });
         }
 
-        $("#fbWildCard").click(function () {
-            GetAlbumIdByName("Profile Pictures", function (targetedAlbumId) {
+        function GetAlbumIdByName(targetAlbumName, callback) {
+            targetAlbumName = "Profile Pictures"; //hardcoded for now.
+            targetAlbumName = $('#albumDropDown').val();
+            var returnId = "";
+            FB.api('/me/albums', 'get', { scope: 'user_photos' },
+                function (response) {
+                    for (var index = 0; index < response.data.length; index++) {
+                        var thisName = response.data[index].name;
+                        if (thisName === targetAlbumName) {
+                            returnId = response.data[index].id;
+                            return callback(returnId);
+                        }
+                    }
+                });
+        }
+
+        $("#getAlbumBtn").click(function () {
+            var selectId = "albumDropDown";
+            var list = document.getElementById(selectId); 
+            if (list.length === 1) {
+                GetPhotoAlbums(function (albums) {
+                    PopulateSelectList(selectId, albums);
+                });
+            }
+        });
+
+        function GetPhotoAlbums(callback) {
+            var albumArray = [];
+            FB.api('/me/albums', 'get', { scope: 'user_photos' },
+                function (response) {
+                    for (var index = 0; index < response.data.length; index++) {
+                        albumArray.push(response.data[index].name);                       
+                    }
+
+                    return callback(albumArray);
+                });
+        };
+
+        function PopulateSelectList(selectId, array) {
+            var list = document.getElementById(selectId);
+            for (var i = 0; i < array.length; i++) {
+                var opt = document.createElement('option');
+                opt.innerHTML = array[i];
+                opt.value = array[i];
+                list.appendChild(opt);
+            }
+        }
+
+        $("#runRaffle").click(function () {
+            var targetAlbumName = $('#albumDropDown').val();
+            debugger;
+            GetAlbumIdByName(targetAlbumName, function (targetedAlbumId) {
                 var albumId = targetedAlbumId;
                 GetTopPhotoIdByAlbumId(albumId, function (topPhotoId) {
                     var photoId = topPhotoId;
