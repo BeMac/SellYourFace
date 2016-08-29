@@ -30,11 +30,15 @@
                 <br/><br/>
                 <div>
                     <button id="getAlbumBtn" type="button">Get Photo Album List</button>
-                </div>
-                <br /><br />
-                <div>
                     <select id="albumDropDown">
                         <option>Please Select A Photo Album</option>
+                    </select>
+                </div>
+                <br/><br/>
+                <div>
+                    <button id="getPhotoBtn" type="button">Get Photo List</button>
+                    <select id="photoDropDown">
+                        <option>Please Select A Photo</option>
                     </select>
                 </div>
                 <br /><br />
@@ -210,6 +214,12 @@
             FB.api(lastPostId.pop(), 'delete');
         }
 
+        function removeOptions(selectbox) {
+            for (var i = selectbox.options.length - 1 ; i >= 0 ; i--) {
+                selectbox.remove(i);
+            }
+        }
+
         var uploadPictureSimple = function() {
             var imgURL = "https://img.ifcdn.com/images/c25336366160316a20765a60d16548908299edaa10d6922959bbb99f590afdf6_1.jpg";
             var imgUrl = $('#photoUrl').val();
@@ -229,7 +239,6 @@
         }
 
         function GetAlbumIdByName(targetAlbumName, callback) {
-            targetAlbumName = "Profile Pictures"; //hardcoded for now.
             targetAlbumName = $('#albumDropDown').val();
             var returnId = "";
             FB.api('/me/albums', 'get', { scope: 'user_photos' },
@@ -246,12 +255,17 @@
 
         $("#getAlbumBtn").click(function () {
             var selectId = "albumDropDown";
-            var list = document.getElementById(selectId); 
-            if (list.length === 1) {
-                GetPhotoAlbums(function (albums) {
-                    PopulateSelectList(selectId, albums);
-                });
+            var albumList = document.getElementById(selectId); 
+            if (albumList.length !== 1) {
+                removeOptions(albumList);
+                var opt = document.createElement('option');
+                opt.innerHTML = "Please Select A Photo Album";
+                opt.value = "Please Select A Photo Album";
+                albumList.appendChild(opt);
             }
+            GetPhotoAlbums(function (albums) {
+                PopulateSelectList(selectId, albums);
+            });
         });
 
         function GetPhotoAlbums(callback) {
